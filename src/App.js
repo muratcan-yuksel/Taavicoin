@@ -54,6 +54,7 @@ function App() {
           contractABI,
           signer
         );
+        //We're then pulling the first account from MetaMask.
         const [account] = await window.ethereum.request({
           method: "eth_requestAccounts",
         });
@@ -63,7 +64,7 @@ function App() {
         let tokenOwner = await tokenContract.owner();
         let tokenSupply = await tokenContract.totalSupply();
         tokenSupply = utils.formatEther(tokenSupply);
-
+        // we're using our setter functions to set our initial state variables to these new values so they can be rendered into our app.
         setTokenName(`${tokenName}`);
         setTokenSymbol(tokenSymbol);
         setTokenTotalSupply(tokenSupply);
@@ -87,6 +88,20 @@ function App() {
     event.preventDefault();
     try {
       if (window.ethereum) {
+        const provider = new ethers.providers.Web3Provider(window.ethereum);
+        const signer = provider.getSigner();
+        const tokenContract = new ethers.Contract(
+          contractAddress,
+          contractABI,
+          signer
+        );
+        const txn = await tokenContract.transfer(
+          inputValue.walletAddress,
+          utils.parseEther(inputValue.transferAmount)
+        );
+        console.log("Transfering Taavi bucks...");
+        await txn.wait();
+        console.log("Bucks transferred", txn.hash);
       } else {
         console.log("Ethereum object not found, install Metamask.");
         setError("Install a MetaMask wallet to get our token.");
@@ -100,6 +115,24 @@ function App() {
     event.preventDefault();
     try {
       if (window.ethereum) {
+        const provider = new ethers.providers.Web3Provider(window.ethereum);
+        const signer = provider.getSigner();
+        const tokenContract = new ethers.Contract(
+          contractAddress,
+          contractABI,
+          signer
+        );
+
+        const txn = await tokenContract.burn(
+          utils.parseEther(inputValue.burnAmount)
+        );
+        console.log("Burning tokens...");
+        await txn.wait();
+        console.log("Tokens burned...", txn.hash);
+
+        let tokenSupply = await tokenContract.totalSupply();
+        tokenSupply = utils.formatEther(tokenSupply);
+        setTokenTotalSupply(tokenSupply);
       } else {
         console.log("Ethereum object not found, install Metamask.");
         setError("Install a MetaMask wallet to get our token.");
@@ -113,6 +146,25 @@ function App() {
     event.preventDefault();
     try {
       if (window.ethereum) {
+        const provider = new ethers.providers.Web3Provider(window.ethereum);
+        const signer = provider.getSigner();
+        const tokenContract = new ethers.Contract(
+          contractAddress,
+          contractABI,
+          signer
+        );
+        let tokenOwner = await tokenContract.owner();
+        const txn = await tokenContract.mint(
+          tokenOwner,
+          utils.parseEther(inputValue.mintAmount)
+        );
+        console.log("Minting tokens...");
+        await txn.wait();
+        console.log("Tokens minted...", txn.hash);
+
+        let tokenSupply = await tokenContract.totalSupply();
+        tokenSupply = utils.formatEther(tokenSupply);
+        setTokenTotalSupply(tokenSupply);
       } else {
         console.log("Ethereum object not found, install Metamask.");
         setError("Install a MetaMask wallet to get our token.");
