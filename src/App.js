@@ -183,7 +183,7 @@ function App() {
 
   useEffect(() => {
     // checkIfWalletIsConnected();
-    getTokenInfo();
+    // getTokenInfo();
   }, []);
 
   return (
